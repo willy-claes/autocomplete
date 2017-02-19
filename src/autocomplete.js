@@ -72,6 +72,7 @@
       type: 'GET',
       dataType: 'json',
       transformResult,
+      deferRequestBy: 0,
     }
 
     // Shared variables:
@@ -94,6 +95,7 @@
     this.selection = null
     this.cachedResponse = {}
     this.currentRequest = null
+    this.deferInterval = null
 
     // Initialize and set options:
     this.initialize()
@@ -204,8 +206,13 @@
       this.suggestions = []
     },
 
+    clearDeferInterval() {
+      clearInterval(this.deferInterval)
+    },
+
     disable() {
       this.disabled = true
+      this.clearDeferInterval()
       this.abortAjax()
     },
 
@@ -383,9 +390,18 @@
         return
       }
 
+      this.clearDeferInterval()
+
       if (this.currentValue !== this.el.val()) {
         this.findBestHint()
-        this.onValueChange()
+
+        if (this.options.deferRequestBy > 0) {
+          this.deferInterval = setInterval(() => {
+            this.onValueChange()
+          }, this.options.deferRequestBy)
+        } else {
+          this.onValueChange()
+        }
       }
     },
 
@@ -399,6 +415,7 @@
         (options.onInvalidateSelection || $.noop).call(this.element)
       }
 
+      this.clearDeferInterval()
       this.currentValue = value
       this.selectedIndex = -1
 
@@ -506,6 +523,7 @@
 
       this.visible = false
       this.selectedIndex = -1
+      this.clearDeferInterval()
       $(this.suggestionsContainer).hide()
       this.signalHint(null)
     },

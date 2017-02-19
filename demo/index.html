@@ -29,6 +29,7 @@
 
         $('#autocomplete-ajax').autocomplete({
           serviceUrl: 'http://localhost:3000/countries',
+          deferRequestBy: 1000,
           onSelect: function (suggestion) {
             console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
           }
