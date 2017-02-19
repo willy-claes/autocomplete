@@ -36,6 +36,10 @@ module.exports = {
       output: {
         comments: false,
       },
+      sourceMap: true,
     })
   ],
+  devServer: {
+    contentBase: path.join(__dirname, 'demo'),
+  },
 }

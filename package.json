@@ -18,7 +18,7 @@
   "homepage": "https://github.com/willy-claes/autocomplete#readme",
   "scripts": {
     "build": "webpack",
-    "start": "webpack --watch src/autocomplete.js"
+    "start:dev": "webpack-dev-server --open"
   },
   "devDependencies": {
     "babel-core": "^6.23.1",
@@ -29,7 +29,8 @@
     "eslint-config-airbnb-base": "^11.1.0",
     "eslint-plugin-import": "^2.2.0",
     "path": "^0.12.7",
-    "webpack": "^2.2.1"
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.4.0"
   },
   "dependencies": {
     "jquery": "^3.1.1"

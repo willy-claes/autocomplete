@@ -103,6 +103,13 @@
 
       this.suggestionsContainer = utils.createNode(this.options.containerClass)
 
+      this.killerFn = (e) => {
+        if (!$(e.target).closest(`.${this.options.containerClass}`).length) {
+          this.killSuggestions()
+          this.disableKillerFn()
+        }
+      }
+
       const container = $(this.suggestionsContainer)
 
       container.appendTo(this.options.appendTo)
@@ -146,12 +153,7 @@
       this.el.on('input.autocomplete', (e) => { this.onKeyUp(e) })
     },
 
-    killerFn(e) {
-      if (!$(e.target).closest(`.${this.options.containerClass}`).length) {
-        this.killSuggestions()
-        this.disableKillerFn()
-      }
-    },
+    killerFn: null,
 
     onFocus() {
       this.fixPosition()
