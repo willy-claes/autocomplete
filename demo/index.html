@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Autocomplete Demo</title>
+  </head>
+  <body>
+    <input type="text" id="autocomplete">
+
+    <script type="text/javascript" src="../scripts/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="../dist/autocomplete.js"></script>
+    <script type="text/javascript">
+      (function ($) {
+        var languages = [
+          { value: 'JavaScript', data: 'javascript' },
+          { value: 'Java', data: 'java' },
+          { value: 'PHP', data: 'php' },
+        ];
+
+        $('#autocomplete').autocomplete({
+          lookup: languages,
+          onSelect: function (suggestion) {
+            console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
+          }
+        });
+      })(jQuery)
+    </script>
+  </body>
+</html>
