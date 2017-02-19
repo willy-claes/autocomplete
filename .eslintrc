@@ -14,6 +14,12 @@
     "semi": [
       2, "never"
     ],
+    "no-console": [
+      2,
+      {
+        "allow": ["log"]
+      }
+    ],
     "no-mixed-operators": [
       0
     ]

@@ -18,9 +18,12 @@
   "homepage": "https://github.com/willy-claes/autocomplete#readme",
   "scripts": {
     "build": "webpack",
-    "start:dev": "webpack-dev-server --open"
+    "start:express": "babel-node ./server",
+    "start:webpack": "webpack-dev-server --open",
+    "start:dev": "npm run start:express & npm run start:webpack"
   },
   "devDependencies": {
+    "babel-cli": "^6.23.0",
     "babel-core": "^6.23.1",
     "babel-eslint": "^7.1.1",
     "babel-loader": "^6.3.2",
@@ -28,6 +31,7 @@
     "eslint": "^3.15.0",
     "eslint-config-airbnb-base": "^11.1.0",
     "eslint-plugin-import": "^2.2.0",
+    "express": "^4.14.1",
     "path": "^0.12.7",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.4.0"

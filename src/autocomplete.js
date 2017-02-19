@@ -33,6 +33,10 @@
     suggestion.value.toLowerCase().indexOf(queryLowerCase) !== -1
   )
 
+  const transformResult = response => (
+    typeof response === 'string' ? $.parseJSON(response) : response
+  )
+
   const keys = {
     ESC: 27,
     TAB: 9,
@@ -63,6 +67,11 @@
       noSuggestionNotice: 'No results',
       orientation: 'bottom',
       forceFixPosition: false,
+      serviceUrl: null,
+      paramName: 'query',
+      type: 'GET',
+      dataType: 'json',
+      transformResult,
     }
 
     // Shared variables:
@@ -83,6 +92,8 @@
     this.hint = null
     this.hintValue = ''
     this.selection = null
+    this.cachedResponse = {}
+    this.currentRequest = null
 
     // Initialize and set options:
     this.initialize()
@@ -188,12 +199,14 @@
     },
 
     clear() {
+      this.cachedResponse = {}
       this.currentValue = ''
       this.suggestions = []
     },
 
     disable() {
       this.disabled = true
+      this.abortAjax()
     },
 
     enable() {
@@ -428,22 +441,60 @@
     },
 
     getSuggestions(q) {
-      const options = this.options
-
-      if ($.isFunction(options.lookup)) {
-        options.lookup(q, (data) => {
+      if ($.isFunction(this.options.lookup)) {
+        this.options.lookup(q, (data) => {
           this.suggestions = data.suggestions
           this.suggest()
         })
         return
       }
 
-      const response = this.getSuggestionsLocal(q)
+      const params = {}
+      params[this.options.paramName] = q
+      const cacheKey = `${this.options.serviceUrl}?${$.param(params)}`
+
+      let response
+      if (this.isLocal) {
+        response = this.getSuggestionsLocal(q)
+      } else {
+        response = this.cachedResponse[cacheKey]
+      }
 
       if (response && $.isArray(response.suggestions)) {
         this.suggestions = response.suggestions
         this.suggest()
+      } else {
+        this.abortAjax()
+
+        const ajaxSettings = {
+          url: this.options.serviceUrl,
+          data: params,
+          type: this.options.type,
+          dataType: this.options.dataType,
+        }
+
+        this.currentRequest = $.ajax(ajaxSettings)
+          .done((data) => {
+            this.currentRequest = null
+
+            const result = this.options.transformResult(data)
+            this.processResponse(result, q, cacheKey)
+          })
       }
+    },
+
+    processResponse(result, originalQuery, cacheKey) {
+      // eslint-disable-next-line no-param-reassign
+      result.suggestions = this.verifySuggestionsFormat(result.suggestions)
+
+      this.cachedResponse[cacheKey] = result
+
+      if (originalQuery !== this.currentValue) {
+        return
+      }
+
+      this.suggestions = result.suggestions
+      this.suggest()
     },
 
     hide() {
@@ -529,6 +580,13 @@
       this.visible = true
     },
 
+    abortAjax() {
+      if (this.currentRequest) {
+        this.currentRequest.abort()
+        this.currentRequest = null
+      }
+    },
+
     adjustContainerWidth() {
       const options = this.options
       const container = $(this.suggestionsContainer)
@@ -578,7 +636,7 @@
     },
 
     verifySuggestionsFormat(suggestions) {
-      // If suggestions is string array, convert them to supported format:
+      // If suggestions is string array, convert them to supported format.
       if (suggestions.length && typeof suggestions[0] === 'string') {
         return $.map(suggestions, value => ({
           value,
